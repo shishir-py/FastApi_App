@@ -8,7 +8,7 @@ from fastapi import HTTPException
 def create_user(user: UserModel) -> str:
     collection = get_collection()
     
-    # Check if a user with the same email already exists
+    # Check for same email and tag them as already exists
     existing_user = collection.find_one({"email": user.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="User with this email already exists")
@@ -21,14 +21,14 @@ def create_user(user: UserModel) -> str:
 def create_users(users: List[UserModel]) -> List[str]:
     collection = get_collection()
     
-    # Check for duplicate emails within the input list
+    # Check for same email and tag them as already exists
     email_set = set()
     for user in users:
         if user.email in email_set:
             raise HTTPException(status_code=400, detail=f"Duplicate email found: {user.email}")
         email_set.add(user.email)
     
-    # Check for existing users in the database
+    # Check for same email and tag them as already exists
     existing_emails = set(collection.distinct("email", {"email": {"$in": list(email_set)}}))
     if existing_emails:
         raise HTTPException(status_code=400, detail=f"Users with these emails already exist: {', '.join(existing_emails)}")
@@ -48,7 +48,7 @@ def get_user(user_id: str) -> UserModel:
 def update_user(user_id: str, user: UserModel) -> UserModel:
     collection = get_collection()
     
-    # Check if the new email (if being updated) already exists for another user
+    # Check for same email and tag them as already exists
     if user.email is not None:
         existing_user = collection.find_one({"email": user.email, "_id": {"$ne": ObjectId(user_id)}})
         if existing_user:

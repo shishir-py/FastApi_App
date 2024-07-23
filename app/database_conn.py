@@ -23,7 +23,6 @@ class Database:
             self.client.close()
             print("Closed MongoDB connection")
 
-# Create a global instance of the Database class
 db = Database()
 
 def get_collection():
